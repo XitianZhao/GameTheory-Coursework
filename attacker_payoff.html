@@ -1,0 +1,158 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="UTF-8">
+<title>3×2 Game Payoff Simplex with Sliders Attacker</title>
+<script src="https://cdn.plot.ly/plotly-latest.min.js"></script>
+<style>
+  body { font-family: Arial, sans-serif; }
+  .slider-container { margin: 20px 0; }
+  .label { margin-right: 15px; font-size: 18px; }
+</style>
+</head>
+
+<body>
+
+<h2>Payoff Simplex for Attacker</h2>
+
+<div class="slider-container">
+  <span class="label">s:</span>
+  <input type="range" id="sSlider" min="0" max="1" value="0.6" step="0.01" style="width:300px;">
+  <span id="sValue">0.60</span>
+
+  &nbsp;&nbsp;&nbsp;&nbsp;
+
+  <span class="label">t:</span>
+  <input type="range" id="tSlider" min="0" max="1" value="0.2" step="0.01" style="width:300px;">
+  <span id="tValue">0.20</span>
+</div>
+
+<div id="plotBH" style="width:48%; height:600px; display:inline-block;"></div>
+<div id="plotBL" style="width:48%; height:600px; display:inline-block;"></div>
+
+<script>
+
+let res = 80;
+let p1 = [], p2 = [], p3 = [];
+let x = [], y = [];
+
+for (let i = 0; i <= res; i++) {
+  for (let j = 0; j <= res - i; j++) {
+    let p1v = i / res;
+    let p2v = j / res;
+    let p3v = 1 - p1v - p2v;
+
+    p1.push(p1v);
+    p2.push(p2v);
+    p3.push(p3v);
+
+    x.push( p2v + 0.5 * p3v );
+    y.push( Math.sqrt(3)/2 * p3v );
+  }
+}
+
+
+function computePayoffs(s, t) {
+  let payBH = [];
+  let payBL = [];
+
+  for (let i = 0; i < p1.length; i++) {
+    // Payoff matrix values
+    let U11 = 0;
+    let U12 = 32 + 78*s;
+
+    let U21 = 109 + 100*s;
+    let U22 = -27;
+
+    let U31 = 74 - 283*t;
+    let U32 = 74 - 283*t;
+
+    // expected payoff vs BH
+    let BH = p1[i]*U11 + p2[i]*U21 + p3[i]*U31;
+
+    // expected payoff vs BL
+    let BL = p1[i]*U12 + p2[i]*U22 + p3[i]*U32;
+
+    payBH.push(BH);
+    payBL.push(BL);
+  }
+
+  return {BH: payBH, BL: payBL};
+}
+
+
+function makeHeatmap(values, title, divID) {
+  let trace = {
+    x: x,
+    y: y,
+    mode: 'markers',
+    type: 'scatter',
+    marker: {
+      size: 8,
+      color: values,
+      colorscale: 'Greys',
+      reversescale: true,
+      colorbar: { title: "Payoff" }
+    }
+  };
+
+  let layout = {
+    title: title,
+    xaxis: { visible: false, range: [-0.1, 1.1] },
+    yaxis: { visible: false, range: [-0.1, 1.0] },
+    shapes: [
+      {
+        type: 'line',
+        x0: 0, y0: 0,
+        x1: 1, y1: 0,
+        line: {width: 3, color: "black"}
+      },
+      {
+        type: 'line',
+        x0: 1, y0: 0,
+        x1: 0.5, y1: Math.sqrt(3)/2,
+        line: {width: 3, color: "black"}
+      },
+      {
+        type: 'line',
+        x0: 0.5, y0: Math.sqrt(3)/2,
+        x1: 0, y1: 0,
+        line: {width: 3, color: "black"}
+      }
+    ],
+    annotations: [
+      {x: -0.05, y: -0.05, text: "AH", showarrow:false, font:{size:16}},
+      {x: 1.05,  y: -0.05, text: "AL", showarrow:false, font:{size:16}},
+      {x: 0.5,   y: Math.sqrt(3)/2 + 0.05, text:"T", showarrow:false, font:{size:16}}
+    ]
+  };
+
+  Plotly.newPlot(divID, [trace], layout);
+}
+
+
+function updatePlots() {
+  let s = parseFloat(document.getElementById("sSlider").value);
+  let t = parseFloat(document.getElementById("tSlider").value);
+
+  document.getElementById("sValue").innerText = s.toFixed(2);
+  document.getElementById("tValue").innerText = t.toFixed(2);
+
+  let payoff = computePayoffs(s, t);
+
+  makeHeatmap(payoff.BH, "Payoff vs BH", "plotBH");
+  makeHeatmap(payoff.BL, "Payoff vs BL", "plotBL");
+}
+
+
+updatePlots();
+
+
+document.getElementById("sSlider").addEventListener("input", updatePlots);
+document.getElementById("tSlider").addEventListener("input", updatePlots);
+
+</script>
+
+</body>
+</html>
+
