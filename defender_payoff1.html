@@ -2,7 +2,7 @@
 <html>
 <head>
 <meta charset="UTF-8">
-<title>3×2 Game Payoff Simplex with Sliders Attacker</title>
+<title>3×2 Game Payoff Simplex with Sliders Defender</title>
 <script src="https://cdn.plot.ly/plotly-latest.min.js"></script>
 <style>
   body { font-family: Arial, sans-serif; }
@@ -13,7 +13,7 @@
 
 <body>
 
-<h2>Payoff Simplex for Attacker</h2>
+<h2>Payoff Simplex for Defender</h2>
 
 <div class="slider-container">
   <span class="label">s:</span>
@@ -58,20 +58,20 @@ function computePayoffs(s, t) {
 
   for (let i = 0; i < p1.length; i++) {
     // Payoff matrix values
-    let U11 = 0;
-    let U12 = 32 + 78*s;
+    let V11 = 0;
+    let V12 = -(32 + 78*s);
 
-    let U21 = 109 + 100*s;
-    let U22 = -27;
+    let V21 = -(109 + 100*s);
+    let V22 = 27;
 
-    let U31 = 74 - 283*t;
-    let U32 = 74 - 283*t;
+    let V31 = -(74 - 283*t);
+    let V32 = -(74 - 283*t);
 
     // expected payoff vs BH
-    let BH = p1[i]*U11 + p2[i]*U21 + p3[i]*U31;
+    let BH = p1[i]*V11 + p2[i]*V21 + p3[i]*V31;
 
     // expected payoff vs BL
-    let BL = p1[i]*U12 + p2[i]*U22 + p3[i]*U32;
+    let BL = p1[i]*V12 + p2[i]*V22 + p3[i]*V32;
 
     payBH.push(BH);
     payBL.push(BL);
